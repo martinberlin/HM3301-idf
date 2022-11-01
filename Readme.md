@@ -14,9 +14,12 @@ Licensed with MIT, please copy it, and make it better!
 
 ### Requirements
 
-ESP-IDF >= v.4.4
-An additional component that is a wrapper of i2c, called i2cdev, that is just 2 files and you can grab from the wiki:
+- ESP-IDF >= v.4.4
+
+- An additional component that is a wrapper of i2c, called i2cdev, that is just 2 files and you can grab from the wiki:
 https://github.com/martinberlin/HM3301-idf/wiki
+
+- A bit of patience
 
 This come as an idea with our project [epaper-weather-station](https://github.com/martinberlin/epaper-weather-station) because if you use RTC and other sensors, then it's silly to add to each of them their own I2C library!
 Just share one common wrapper and use it for all of them.
