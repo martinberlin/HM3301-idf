@@ -9,6 +9,27 @@ HM330X::HM330X(uint8_t IIC_ADDR) {
     _i2c_address = IIC_ADDR;
 }
 
+HM330XErrorCode HM330X::init(i2c_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpio, gpio_num_t scl_gpio) {
+    dev->port = port;
+    dev->addr = _i2c_address;
+    dev->sda_io_num = sda_gpio;
+    dev->scl_io_num = scl_gpio;
+    
+    // I2C standard mode datasheet says max: 100kHz but with more than 10Khz delivers noise from time to time
+    // specially after waking up from sleep (Using SET pin low)
+    // Check for more information: https://github.com/Seeed-Studio/Seeed_PM2_5_sensor_HM3301/issues/18
+    dev->clk_speed = 10000;
+    esp_err_t i2c_init = i2c_master_init(port, sda_gpio, scl_gpio, dev->clk_speed);
+
+    ESP_LOGI("HM330X", "I2C Addr:%x SDA:%d SCL:%d FREQ:%lu", _i2c_address, sda_gpio, scl_gpio,  dev->clk_speed);
+
+    if (i2c_init != 0) {
+        ESP_LOGE("HM330X", "i2c_master_init: %d desc: %s", i2c_init, esp_err_to_name(i2c_init));
+        return ERROR_COMM;
+    }
+    return select_comm(dev);
+}
+
 HM330XErrorCode HM330X::select_comm(i2c_dev_t *dev) {
     uint8_t outdata[1];
     outdata[0] = HM330X_SELECT_ADDR;
@@ -26,28 +47,10 @@ HM330XErrorCode HM330X::select_comm(i2c_dev_t *dev) {
         ESP_LOGE("HM330X", "Error sending 0x88 select command");
         return ERROR_COMM;
        }
-       vTaskDelay(150 / portTICK_PERIOD_MS);
+       vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     
     return NO_ERROR;
-}
-
-HM330XErrorCode HM330X::init(i2c_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpio, gpio_num_t scl_gpio) {
-    dev->port = port;
-    dev->addr = _i2c_address;
-    dev->sda_io_num = sda_gpio;
-    dev->scl_io_num = scl_gpio;
-    // I2C standard mode datasheet says max: 100kHz but with more than 20Khz delivers noise from time to time
-    dev->clk_speed = 20000;
-    esp_err_t i2c_init = i2c_master_init(port, sda_gpio, scl_gpio, dev->clk_speed);
-
-    ESP_LOGI("HM330X", "I2C Addr:%x SDA:%d SCL:%d FREQ:%lu", _i2c_address, sda_gpio, scl_gpio,  dev->clk_speed);
-
-    if (i2c_init != 0) {
-        ESP_LOGE("HM330X", "i2c_master_init: %d desc: %s", i2c_init, esp_err_to_name(i2c_init));
-        return ERROR_COMM;
-    }
-    return select_comm(dev);
 }
 
 HM330XErrorCode HM330X::read_sensor_value(i2c_dev_t *dev, uint8_t* data) {
