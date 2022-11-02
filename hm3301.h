@@ -1,6 +1,6 @@
 /**
  * @file hm3301.h
- * @author your name (you@domain.com)
+ * @author Martin Fasani | www.fasani.de
  * @briefDriver for Seeed PM2.5 Sensor(HM300)
  * Original driver in Seeed studio repository:
  * https://github.com/Seeed-Studio/Seeed_PM2_5_sensor_HM3301
@@ -10,7 +10,10 @@
 #pragma once
 
 #include "driver/i2c.h"
-
+/**
+ * i2cdev is a common wrapper you can use for any I2C devices. Find it in the WiKi
+ * https://github.com/martinberlin/HM3301-idf/wiki
+ */
 #include "i2cdev.h"
 
 // HM330X error codes

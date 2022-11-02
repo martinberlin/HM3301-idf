@@ -21,7 +21,6 @@ HM330XErrorCode HM330X::select_comm(i2c_dev_t *dev) {
        i2c_master_start(cmd);
        ret2 = i2c_master_write(cmd, (uint8_t*) outdata, 1, ACK_CHECK_EN);
        ESP_LOGI("HM330X", "Retry %d i2c_master_write: %s", retryCount, esp_err_to_name(ret2));
-       
        i2c_master_stop(cmd);
        if (ret2 != 0) {
         ESP_LOGE("HM330X", "Error sending 0x88 select command");
