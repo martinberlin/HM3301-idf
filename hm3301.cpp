@@ -37,7 +37,7 @@ HM330XErrorCode HM330X::init(i2c_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpi
     dev->addr = _i2c_address;
     dev->sda_io_num = sda_gpio;
     dev->scl_io_num = scl_gpio;
-    dev->clk_speed = 400000;
+    dev->clk_speed = 100000;
     esp_err_t i2c_init = i2c_master_init(port, sda_gpio, scl_gpio, dev->clk_speed);
 
     ESP_LOGI("HM330X", "I2C Addr:%x SDA:%d SCL:%d FREQ:%lu", _i2c_address, sda_gpio, scl_gpio,  dev->clk_speed);
