@@ -15,10 +15,10 @@ HM330XErrorCode HM330X::init(i2c_dev_t *dev, i2c_port_t port, gpio_num_t sda_gpi
     dev->sda_io_num = sda_gpio;
     dev->scl_io_num = scl_gpio;
     
-    // I2C standard mode datasheet says max: 100kHz but with more than 10Khz delivers noise from time to time
-    // specially after waking up from sleep (Using SET pin low)
+    // I2C standard mode datasheet says max: 100kHz but we use it at half speedo
+    // After waking up from sleep (Using SET pin low) ir gaves wrong data out
     // Check for more information: https://github.com/Seeed-Studio/Seeed_PM2_5_sensor_HM3301/issues/18
-    dev->clk_speed = 10000;
+    dev->clk_speed = 50000;
     esp_err_t i2c_init = i2c_master_init(port, sda_gpio, scl_gpio, dev->clk_speed);
 
     ESP_LOGI("HM330X", "I2C Addr:%x SDA:%d SCL:%d FREQ:%lu", _i2c_address, sda_gpio, scl_gpio,  dev->clk_speed);
@@ -66,25 +66,32 @@ HM330XErrorCode HM330X::read_sensor_value(i2c_dev_t *dev, uint8_t* data) {
 uint16_t HM330X::decode_uint16(uint8_t* data, int i) {
     return data[i * 2] * 0x100 + data[i * 2 + 1];
 }
-    // Concentration based on CF=1 Standard Particulate (ug/m3)
+
+// PREAMBLE Data 0 has:
+// Frame length=2x13+2(data+ Check Digit)
+
+// Concentration based on CF=1，Standard particulate (ug/m3)
+// Data 1 PM1.0 concentration (always 2 bytes uint16)
 uint16_t HM330X::getPM1_sp() {
     return decode_uint16(_dataresult, 2);
 }
+// Data 2 PM2.5 concentration
 uint16_t HM330X::getPM2dot5_sp(){
     return decode_uint16(_dataresult, 3);
 }
+// Data 3 PM10 concentratio
 uint16_t HM330X::getPM10_sp(){
     return decode_uint16(_dataresult, 4);
 }
 
-// Concentration based on the pollutants in the air (ug/m3)
-uint16_t HM330X::getPM1_pol() {
+// Concentration based on the Atmospheric environment
+uint16_t HM330X::getPM1_atmospheric() {
     return decode_uint16(_dataresult, 5);
 }
-uint16_t HM330X::getPM2dot5_pol(){
+uint16_t HM330X::getPM2dot5_atmospheric(){
     return decode_uint16(_dataresult, 6);
 }
-uint16_t HM330X::getPM10_pol(){
+uint16_t HM330X::getPM10_atmospheric(){
     return decode_uint16(_dataresult, 7);
 }
 
@@ -107,7 +114,6 @@ uint16_t HM330X::getP5(){
 uint16_t HM330X::getP10(){
     return decode_uint16(_dataresult, 13);
 }
-
 
   // The data sheet says "Standard particulate" and "Atmospheric environment", but what they mean?
   // Explained by https://github.com/tomoto

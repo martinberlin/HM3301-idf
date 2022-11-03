@@ -51,11 +51,10 @@ class HM330X {
     uint16_t getPM2dot5_sp();
     uint16_t getPM10_sp();
     
-    // _pol
-    // Concentration based on the pollutants in the air (ug/m3)
-    uint16_t getPM1_pol();
-    uint16_t getPM2dot5_pol();
-    uint16_t getPM10_pol();
+    // _atmospheric environment
+    uint16_t getPM1_atmospheric();
+    uint16_t getPM2dot5_atmospheric();
+    uint16_t getPM10_atmospheric();
 
     // Number of particles with the specified diameter or above in 0.1L of air
     uint16_t getP0dot3();
